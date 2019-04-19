@@ -42,8 +42,12 @@ class MainClass {
         dateValidation(args[2]);
         LocalDate endingDate=LocalDate.parse(args[2],formatter);
 
-        //Days between Starting and Ending Date
+        //Days between Starting and Ending Date. We add (+1) because we would get 0 if starting date and ending date were the same.
         daysBetween = ChronoUnit.DAYS.between(startingDate, endingDate)+1;
+        if(daysBetween<0){
+            System.out.println("Starting date is after Ending date! Please enter correct dates. Program will shutdown!");
+            exit(1);
+        }
 
         // Looping through dates between given period of time
         for(int i=0;i<daysBetween;i++) {
@@ -84,7 +88,6 @@ class MainClass {
 
     /**Reading xml data and parsing*/
     private static void getXmlTableData(String xmlCode,String currencyCode) throws ParserConfigurationException {
-
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = dbf.newDocumentBuilder();
         try {
@@ -137,8 +140,14 @@ class MainClass {
             System.out.println("Wrong date format! Program will shutdown!");
             exit(1);
         }
-        if((Integer.valueOf(parts[0])<2000 || Integer.valueOf(parts[0])>2019) || (Integer.valueOf(parts[1])>12 || Integer.valueOf(parts[1])==0 ) || (Integer.valueOf(parts[2])>31 || Integer.valueOf(parts[2])==0)){
-            System.out.println("Wrong date! Please enter correct date. Program will shutdown!");
+        if(Integer.valueOf(parts[0])<2000 || Integer.valueOf(parts[0])>2019) {
+            System.out.println("Wrong year input! Please enter correct date. Program will shutdown!");
+            exit(1);
+        } else if(Integer.valueOf(parts[1])>12 || Integer.valueOf(parts[1])==0 ) {
+            System.out.println("Wrong month input! Please enter correct date. Program will shutdown!");
+            exit(1);
+        } else if (Integer.valueOf(parts[2])>31 || Integer.valueOf(parts[2])==0){
+            System.out.println("Wrong days input! Please enter correct date. Program will shutdown!");
             exit(1);
         }
     }
