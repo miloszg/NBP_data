@@ -65,11 +65,14 @@ class MainClass {
 
     /** Getting dir.txt with xml table names*/
     private static String getXmlTableCode(LocalDate startingDate) {
+        boolean yearChanged=false;
         String xmlCode = "";
         try {
+            //TODO ZEBY NIE SCIAGAC CALY CZAS NOWYCH Z NETA
             String url_text = "http://www.nbp.pl/kursy/xml/dir" + startingDate.getYear() + ".txt";
             URL url = new URL(url_text);
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
             int year=startingDate.getYear() - 2000;
             String regex_text = "c...z" + String.format("%02d",year) + String.format("%02d", startingDate.getMonthValue()) + String.format("%02d", startingDate.getDayOfMonth());
             while ((xmlCode = in.readLine()) != null) {
