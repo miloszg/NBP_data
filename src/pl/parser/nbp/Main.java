@@ -9,7 +9,6 @@ import org.xml.sax.SAXException;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Array;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -25,11 +24,11 @@ class MainClass {
     static float buy_value=0;
     static float sale_value=0;
     static float daysBetween=0.0f;
+    static float missingTablesAmount=0.0f;
     static ArrayList<Float> saleValuesArray=new ArrayList<>();
 
     public static void main(String[] args) throws ParserConfigurationException {
         DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
         // Starting params - CODE CURRENCY
         currencyCodeValidation(args[0]);
         String currencyCode=args[0];
@@ -55,20 +54,19 @@ class MainClass {
             startingDate=startingDate.plusDays(1);
         }
 
+        // Output data calculations
         float sum=0;
         for(int k=0;k<saleValuesArray.size();k++){
-            sum+=Math.pow((saleValuesArray.get(k)-(sale_value/daysBetween)),2);
+            sum+=Math.pow((saleValuesArray.get(k)-(sale_value/(daysBetween-missingTablesAmount))),2);
         }
-        System.out.println("Average currency buy rate:          "+String.format("%.4f",buy_value/daysBetween));
-        System.out.println("Standard deviation of sales rates:  "+String.format("%.4f",Math.sqrt(sum/daysBetween)));
+        System.out.println(String.format("%.4f",buy_value/(daysBetween-missingTablesAmount)));
+        System.out.println(String.format("%.4f",Math.sqrt(sum/(daysBetween-missingTablesAmount))));
     }
 
     /** Getting dir.txt with xml table names*/
     private static String getXmlTableCode(LocalDate startingDate) {
-        boolean yearChanged=false;
         String xmlCode = "";
         try {
-            //TODO ZEBY NIE SCIAGAC CALY CZAS NOWYCH Z NETA
             String url_text = "http://www.nbp.pl/kursy/xml/dir" + startingDate.getYear() + ".txt";
             URL url = new URL(url_text);
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -89,8 +87,9 @@ class MainClass {
         return xmlCode;
     }
 
-    /**Reading xml data and parsing*/
+    /** Reading xml data and parsing*/
     private static void getXmlTableData(String xmlCode,String currencyCode) throws ParserConfigurationException {
+
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = dbf.newDocumentBuilder();
         try {
@@ -119,8 +118,8 @@ class MainClass {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            daysBetween--;
-            e.printStackTrace();
+            // we increment variable whenever there were no xml table for specific date and while calculating output we will subtract this amount from daysBetween
+           missingTablesAmount++;
         } catch (SAXException e) {
             e.printStackTrace();
         }
